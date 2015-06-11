@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.dsystems.utils.Attributes;
 import org.dsystems.utils.Record;
+import org.dsystems.utils.ValidatorResponse;
 
 public class CSVParser extends Parser implements Serializable{
 
@@ -13,11 +14,19 @@ public class CSVParser extends Parser implements Serializable{
 	public static final String FIELDS = "fields"; 
 	
 	public CSVParser(Attributes attrs){
-		this(",", attrs);
-	}
-	public CSVParser(String delimeter, Attributes attrs) {
-		this.delimeter = delimeter;
+		Object delimeter = null;
+		String delimeterStr = "";
+		if (attrs != null) {
+			delimeter = attrs.get("delimeter");
+		}
+		if (delimeter != null) {
+			delimeterStr = delimeter.toString();
+		} else {
+			delimeterStr = ",";
+		}
+		this.delimeter = delimeterStr;
 		this.attrs = attrs;
+		
 	}
 
 	@Override
@@ -40,6 +49,17 @@ public class CSVParser extends Parser implements Serializable{
 		}
 		
 		return record;
+	}
+	@Override
+	public ValidatorResponse validate() {
+		if (this.attrs != null && this.attrs.getValue(FIELDS) != null)
+			return new ValidatorResponse(true, "");
+		return new ValidatorResponse(false, "Required property '" + FIELDS + "' not found!");
+	}
+	@Override
+	public Parser init(Attributes attrs) {
+		this.attrs = attrs;
+		return new CSVParser(attrs);
 	}
 
 }
